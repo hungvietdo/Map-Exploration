@@ -10,6 +10,11 @@ Dr. Gene Hou (Department of Mechanical Engineer)
 Abstract- Will be added
 -----------------------
 
+<a href="https://www.youtube.com/watch?v=x5VYHYvMxWk&feature=youtu.be
+" target="_blank"><img src="http://img.youtube.com/vi/x5VYHYvMxWk/0.jpg" 
+alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" /></a>
+
+
 Table of Contents
 -----------------
 
