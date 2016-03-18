@@ -192,8 +192,7 @@ Table 1: Car Commands
 
 Will be added
 
-![](media/image6.png){width="6.334776902887139in"
-height="3.5364588801399823in"}
+![](media/image6.png)
 
 Figure 3: First Trial algorithms
 
@@ -212,11 +211,7 @@ there is no decision making.
 **Note:** This document will not discuss about Dijkstra’s algorithm. For
 further explanation of Dijkstra’s algorithm, please visit Wikipedia or
 any other website.
-
-![](media/image7.png){width="3.1406255468066493in"
-height="3.1406255468066493in"}
-
-Figure 4: Dijkstra's algorithm illustration
+ 
 
 5. Coding explanation
 =====================
@@ -253,81 +248,66 @@ main()
 
 **Runningcar.h** stores abstracts of functions and variables as follow:
 
-//Reset data
+ 
 
-**void** dataInitialize();
-
-//Check the Final Destination.
-
-**bool** checkFinishPos (Position v\_Pos);
-
+```c
+//Reset data  
+void dataInitialize();  
+  
+//Check the Final Destination. 
+bool checkFinishPos (Position v_Pos);  
+  
 //Check the availability of the front box.
-
-**bool** checkBlockPosition(Position v\_Pos);
-
+bool checkBlockPosition(Position v_Pos);  
+  
 //Check chessboard boundary conditions.
-
-**bool** checkBoundary(Position v\_Pos);
-
+bool checkBoundary(Position v_Pos);  
+  
 //Mark the unavailable box.
-
-**void** blockPosition(Position v\_Pos);
-
+void blockPosition(Position v_Pos);   
+  
 //Set the status of current position as visited
-
-**void** setVisit (Position \*v\_Pos);
-
-//Print current map status
-
-**void** PrintBoard();
-
-//Get a shortest path based on Dijkstra's algorithm
-
-**void** GetShortestPath();
-
-//Get steps that the car can travel in one command
-
-**int** GetNumberOfSteps (**int** v\_travelPos);
-
-//Determine the next step and direction using the current direction and
-position
-
-**char** get\_next\_direction (**int** v\_pos, **char** v\_dir);
-
-//Go forward
-
-**void** GoForward(Position \*v\_currPos);
-
-//Calculate the distance from current position to the destination
-
-**int** CalDistance(Position v\_Pos,Position v\_FinishPos);
-
+void setVisit (Position *v_Pos);  
+  
+//Print current map status  
+void PrintBoard();  
+  
+//Get a shortest path based on Dijkstra's algorithm  
+void GetShortestPath();  
+  
+//Get steps that the car can travel in one command   
+int GetNumberOfSteps (int v_travelPos);  
+  
+//Determine the next step and direction using the current direction and position
+char get_next_direction (int v_pos, char v_dir);  
+  
+//Go forward  
+void GoForward(Position *v_currPos);  
+  
+//Calculate the distance from current position to the destination  
+int CalDistance(Position v_Pos,Position v_FinishPos);  
+  
 //Check the availability of nearby boxes.
+char GetPosNotChecked(Position v_currPos);  
+  
+//Translate a near-by box to position   
+//For example: a left position of current position (3,4,N) is (2,4)  
+Position getPos(Position v_Pos,char v_side);  
+  
+//Check the min value (number of visits) of near-by positions  
+char GetMinValue (Position v_currPos);  
+  
+//Turn the car to the Left ‘L’, Right ‘R’, or Turn Around ‘B’ 
+void TurnTheCar(Position *v_currPos, char v_turn);  
+  
+//Check if there is an obstacle in-front: sensor data (1) is blocked, (0) is free to go  
+bool checkBall(Position v_currPos, char v_sensor_data);  
+  
+//A function in second step which displays the results  
+void setCurrentTravel(Position *v_currentPos,int i); 
 
-**char** GetPosNotChecked(Position v\_currPos);
+```
 
-//Translate a near-by box to position
-
-//For example: a left position of current position (3,4,N) is (2,4)
-
-Position getPos(Position v\_Pos,**char** v\_side);
-
-//Check the min value (number of visits) of near-by positions
-
-**char** GetMinValue (Position v\_currPos);
-
-//Turn the car to the Left ‘L’, Right ‘R’, or Turn Around ‘B’
-
-**void** TurnTheCar(Position \*v\_currPos, **char** v\_turn);
-
-//Check if there is an obstacle in-front: sensor data (1) is blocked,
-(0) is free to go
-
-**bool** checkBall(Position v\_currPos, **char** v\_sensor\_data);
-
-//A function in second step which displays the results
-
-**void** setCurrentTravel(Position \*v\_currentPos,**int** i);
 
 **Runningcar.cpp** stores functions content.
 
