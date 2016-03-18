@@ -1,0 +1,94 @@
+# depslib dependency file v1.0
+1448690464 source:c:\users\home\documents\github\car-mapping\1. in developing\lucky\runningcar.cpp
+	"runningcar.h"
+	<windows.h>
+	<iostream>
+	<string>
+	<sstream>
+
+1448690425 c:\users\home\documents\github\car-mapping\1. in developing\lucky\runningcar.h
+
+1448598384 source:c:\users\home\documents\github\car-mapping\1. in developing\lucky\serial.cpp
+	"Serial.h"
+
+1448598409 c:\users\home\documents\github\car-mapping\1. in developing\lucky\serial.h
+	<windows.h>
+	<stdio.h>
+	<stdlib.h>
+
+1450293550 source:c:\users\home\dropbox\mae 495 project mapping\lucky\main.cpp
+	<iostream>
+	<tchar.h>
+	"runningcar.h"
+	<string>
+	<sstream>
+	"Serial.h"
+
+1451704120 c:\users\home\dropbox\mae 495 project mapping\lucky\runningcar.h
+
+1448598409 c:\users\home\dropbox\mae 495 project mapping\lucky\serial.h
+	<windows.h>
+	<stdio.h>
+	<stdlib.h>
+
+1450293318 source:c:\users\home\dropbox\mae 495 project mapping\lucky\runningcar.cpp
+	"runningcar.h"
+	<windows.h>
+	<iostream>
+	<string>
+	<sstream>
+
+1448598384 source:c:\users\home\dropbox\mae 495 project mapping\lucky\serial.cpp
+	"Serial.h"
+
+1453000015 source:c:\users\home\dropbox\mae 495 project mapping\lucky_2steps\main.cpp
+	<iostream>
+	<tchar.h>
+	"runningcar.h"
+	<string>
+	<sstream>
+	"Serial.h"
+
+1452999542 c:\users\home\dropbox\mae 495 project mapping\lucky_2steps\runningcar.h
+
+1448598409 c:\users\home\dropbox\mae 495 project mapping\lucky_2steps\serial.h
+	<windows.h>
+	<stdio.h>
+	<stdlib.h>
+
+1448598384 source:c:\users\home\dropbox\mae 495 project mapping\lucky_2steps\serial.cpp
+	"Serial.h"
+
+1452999751 source:c:\users\home\dropbox\mae 495 project mapping\lucky_2steps\runningcar.cpp
+	"runningcar.h"
+	<windows.h>
+	<iostream>
+	<string>
+	<sstream>
+
+1457290750 source:c:\users\hung do\desktop\lucky_2steps-2\main.cpp
+	"runningcar.h"
+
+1457466200 c:\users\hung do\desktop\lucky_2steps-2\runningcar.h
+	<iostream>
+	<tchar.h>
+	<time.h>
+	<string>
+	<sstream>
+	"Serial.h"
+	<windows.h>
+	<iostream>
+	<string>
+	<sstream>
+
+1448616408 c:\users\hung do\desktop\lucky_2steps-2\serial.h
+	<windows.h>
+	<stdio.h>
+	<stdlib.h>
+
+1457290595 source:c:\users\hung do\desktop\lucky_2steps-2\runningcar.cpp
+	"runningcar.h"
+
+1448616384 source:c:\users\hung do\desktop\lucky_2steps-2\serial.cpp
+	"Serial.h"
+
