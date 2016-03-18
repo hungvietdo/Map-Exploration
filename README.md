@@ -235,16 +235,14 @@ Two parts:
 Server: main.cpp, runningcar.cpp, runningcar.h, Serial.cpp, Serial.h
 
 **Main.cpp** has four functions:
-
+```c
 main()
 
-> **void** step1\_getmapinfo(Position CurrPosCar)
->
-> **void** step2\_shortpath()
->
-> **char** Command\_Sensor(char \*ch)
->
-> **void** Command\_Data (char \*ch, int sleeptime)
+void step1_getmapinfo(Position CurrPosCar)
+void step2_shortpath()
+char Command_Sensor(char *ch)
+void Command_Data (char *ch, int sleeptime)
+```
 
 **Runningcar.h** stores abstracts of functions and variables as follow:
 
