@@ -89,8 +89,7 @@ install MinGW correctly.
 
 **Note:** Select options as the screenshot below:
 
-![](media/image1.png){width="5.835227471566054in"
-height="2.057292213473316in"}
+![](media/image1.png)
 
 Figure 1: MinGW requirements
 
@@ -127,7 +126,7 @@ chessboard map. This chessboard map is used to identifying and locating
 the position and direction of the robot. The length and dimension of the
 chessboard can be preset which give the power to cover a specific area.
 
-![](media/image2.png){width="5.390736001749781in" height="3.248264435695538in"}
+![](media/image2.png)
 ===============================================================================
 
 Figure 2: Chessboard design
@@ -138,7 +137,7 @@ Figure 2: Chessboard design
  4.1 Data Flow
 --------------
 
-![](media/image3.jpeg){width="6.5in" height="2.2916666666666665in"}
+![](media/image3.png)
 
 Figure 2: Overall Data Flow
 
@@ -153,8 +152,7 @@ task, the sonar or motor will send a feedback signal back to the Arduino
 to notify the completion.The feedback will be sent to Xbee2, then Xbee1
 and finally back to the computer to update the status
 
-![](media/image4.jpeg){width="6.270833333333333in"
-height="4.270833333333333in"}
+![](media/image4.png)
 
 Figure 3: Computer Data Flow
 
@@ -163,7 +161,7 @@ computer will first order the commands to Xbee1. And, after receiving
 the feedback from the Xbee1. The data will be updated into three
 categories, such as Direction, Location, and Map characteristic.
 
-![](media/image5.jpeg){width="6.5in" height="3.9583333333333335in"}
+![](media/image5.png)
 
 Figure 4: Arduino Data Flow
 
@@ -194,7 +192,7 @@ Table 1: Car Commands
 
 Will be added
 
-![](media/image6.jpeg){width="6.334776902887139in"
+![](media/image6.png){width="6.334776902887139in"
 height="3.5364588801399823in"}
 
 Figure 3: First Trial algorithms
