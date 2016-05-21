@@ -1,0 +1,2 @@
+void map_exploration();
+

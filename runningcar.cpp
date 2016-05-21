@@ -1,19 +1,224 @@
 #include "runningcar.h"
+#include <limits.h>
 using namespace std;
+Serial* SP = new Serial("\\\\.\\COM3");    // adjust as needed
 
 int BallsArray[ChessBoardWidth][ChessBoardWidth];
 int VisitsArray[ChessBoardWidth][ChessBoardWidth];
 int VisitsArrayTime[ChessBoardWidth][ChessBoardWidth];
 int ShortPath[ChessBoardWidth][ChessBoardWidth];
+int travelPath[ChessBoardWidth][ChessBoardWidth];
+int tmpShortPath[ChessBoardWidth][ChessBoardWidth];
+int BallExploration[ChessBoardWidth][ChessBoardWidth];
 
 int VisitTimeCount;
 
 //position BlockArray[6] = {{1,4},{2,3},{4,2},{6,1},{4,6},{5,5}};
+//Position TravelArray[200];
 
 Position TravelArray[200];
 
 Position FinishPos = {FinishX,FinishY};
 Position StartPos = {StartX,StartY};
+
+
+bool checking_pos(Position frontPos)
+{
+    if (checkBoundary(frontPos))
+            {
+                //Send a sensor signal to the car. Return value is a char with 0 or 1
+                char sensor_info = Command_Sensor("S");
+
+                if ((sensor_info == '1') || (BallExploration[frontPos.horizontal][frontPos.vertical] ==1)) //check sensor and data before
+                    {
+                    //add frontPos to the list
+
+                        BallExploration[frontPos.horizontal][frontPos.vertical] = 0; //free position
+                        return true;
+                    }
+                else
+                {
+                    BallExploration[frontPos.horizontal][frontPos.vertical] = 1; //blocked position
+                    return false;
+                }
+            }
+
+}
+
+int get_min_step(Position from_pos,Position to_pos)
+{
+    int i,j;
+    bool v_check;
+
+
+    for (i=1;i<ChessBoardWidth+1;i++)
+        for (j=1;j<ChessBoardWidth+1;j++)
+        {
+            //BallExploration[i][j] = -1;
+
+            tmpShortPath[i][j] = SHRT_MAX;//
+        }
+
+    //Init the first pos
+    tmpShortPath[from_pos.horizontal][from_pos.vertical] = 0;
+
+    //Calculate the shortest matrix
+    do {
+        v_check = false;
+
+        for (i = ChessBoardWidth;i>0;i--)
+            for (j = ChessBoardWidth; j>0; j--)
+            {
+                if (BallExploration[i][j] == 0)
+                    {
+                        if ((j+1<ChessBoardWidth) && (BallExploration[i][j+1] == 0) && (tmpShortPath[i][j+1]>tmpShortPath[i][j]+1))
+                        {
+
+                              v_check = true;
+                             tmpShortPath[i][j+1] = tmpShortPath[i][j]+1 ;
+                        }
+                        if ((j-1>0) && (BallExploration[i][j-1] == 0) && (tmpShortPath[i][j-1]>tmpShortPath[i][j]+1))
+                        {
+
+                              v_check = true;
+                             tmpShortPath[i][j-1] = tmpShortPath[i][j]+1 ;
+                        }
+
+                        if ((i-1>0) && (BallExploration[i-1][j] == 0) && (tmpShortPath[i-1][j]>tmpShortPath[i][j]+1))
+                        {
+
+                              v_check = true;
+                             tmpShortPath[i-1][j] = tmpShortPath[i][j]+1 ;
+                        }
+                        if ((i+1<ChessBoardWidth) && (BallExploration[i+1][j] == 0) && (tmpShortPath[i+1][j]>tmpShortPath[i][j]+1))
+                        {
+
+                              v_check = true;
+                             tmpShortPath[i+1][j] = tmpShortPath[i][j]+1 ;
+                        }
+                    }
+
+            }
+    } while (v_check);
+
+    //Return steps need to take from_pos to to_pos
+    return tmpShortPath[to_pos.horizontal][to_pos.vertical];
+}
+
+Position get_to_closest_pos(std::vector<Position> vectorPositions,Position start_pos)
+{
+
+    int v_steps,min_steps;
+    Position v_pos;
+
+    min_steps = SHRT_MAX;
+
+    Position finish_pos;
+    for ( int i =0; i<vectorPositions.size(); ++i)
+    {
+        finish_pos = vectorPositions.at(i);
+        v_steps = get_min_step(finish_pos,start_pos); //***** Very important: in the reverse order finish_pos and start_pos *****
+
+        if (v_steps<min_steps)
+        {
+            min_steps = v_steps;
+            v_pos = finish_pos;
+
+            //remember travel path
+            for (int i=1;i<ChessBoardWidth+1;i++)
+                for (int j=1;j<ChessBoardWidth+1;j++)
+                    {
+                        travelPath[i][j] = tmpShortPath[i][j];
+                    }
+        }
+    }
+    return v_pos; //the closest position
+
+}
+
+void travel_from_pos_to_pos(Position from_pos,Position to_pos)
+{
+    //Get travel path
+
+    int StepsCount = travelPath[from_pos.horizontal] [ from_pos.vertical ];
+    int v_v, v_h;
+    Position travelPos = from_pos;
+    int i = 1;
+    Position TravelPos;
+    char v_turn;
+    int v_travelpos = 1;
+    int v_steps;
+    string str;
+
+    while (StepsCount+1 > i)
+        {
+           TravelArray[i] =  travelPos;
+           v_v = travelPos.vertical;
+           v_h = travelPos.horizontal;
+           if (travelPath[v_h][v_v+1] == travelPath[v_h][v_v]-1)
+                travelPos.vertical++;
+                else if (travelPath[v_h][v_v-1] == travelPath[v_h][v_v]-1)
+                        travelPos.vertical--;
+                        else if (travelPath[v_h+1][v_v] == travelPath[v_h][v_v]-1)
+                                travelPos.horizontal++;
+                                else if (travelPath[v_h-1][v_v] == travelPath[v_h][v_v]-1)
+                                        travelPos.horizontal--;
+           i++;
+        }
+
+    //Make the actual run from the TravelArray info
+    TravelPos.Direction = from_pos.Direction; //start direction
+    TravelPos.horizontal = from_pos.horizontal;
+    TravelPos.vertical = from_pos.vertical;
+
+     while ((TravelPos.horizontal != to_pos.horizontal) || (TravelPos.horizontal != to_pos.horizontal))
+     //   for (int i=1;i<10;i++)
+        {
+        //turn the car
+        v_turn = get_next_direction(v_travelpos,TravelPos.Direction);
+
+        std::cout << "turn the car " << v_turn << endl;
+
+        //Physical turn the car
+        if (v_turn != 'F')
+            {
+                char *pChar = &v_turn;
+                Command_Data(pChar,500);
+            }
+
+         v_steps = GetNumberOfSteps(v_travelpos);
+        //run the car v_steps
+        std::cout << "Number of steps: " << v_steps << endl;
+
+            std::stringstream ss;
+            ss << TravelPos.Direction << v_turn;
+            str = ss.str();
+
+            //cout << " before dir: " << TravelPos.Direction << " str: " << str << endl;
+
+            if ((str == "EL") || (str == "WR")) TravelPos.Direction = 'N';
+            if ((str == "WL") || (str == "ER")) TravelPos.Direction = 'S';
+            if ((str == "SL") || (str == "NR")) TravelPos.Direction = 'E';
+            if ((str == "NL") || (str == "SR")) TravelPos.Direction = 'W';
+
+               //Run the car v_steps
+
+            char c_steps[10];
+            snprintf(c_steps, sizeof c_steps, "%d", v_steps);
+			puts(c_steps);
+
+            cout << c_steps;
+            Command_Data(c_steps,500);
+            setCurrentTravel(&TravelPos,v_travelpos + v_steps);
+            v_travelpos = v_travelpos + v_steps ;
+
+            cout << "current position" << TravelPos.horizontal << "," << TravelPos.vertical << endl ;
+
+
+        }
+
+
+}
 
 bool checkFinishPos (Position v_Pos)
 {
@@ -27,11 +232,10 @@ int CalDistance(Position v_Pos,Position v_FinishPos)
 
 }
 
-int GetNumberOfSteps (int v_travelPos)
+int GetNumberOfSteps ( int v_travelPos)
 {
-    int i = 1;
-    Position v_pos;
-    v_pos = TravelArray[v_travelPos];
+    int i =1;
+    Position v_pos = TravelArray[v_travelPos];
 
     if (v_pos.horizontal == TravelArray[v_travelPos+i].horizontal)
     {
@@ -173,17 +377,16 @@ void PrintBoard()
 
 void dataInitialize()
 {
-    int i, j;
-    //Reset ball array
-    VisitTimeCount =0;
 
-    for (i=1;i<ChessBoardWidth+1;i++)
-        for (j=1;j<ChessBoardWidth+1;j++)
+      //Connect to the COM port
+     if (SP->IsConnected())
+		cout << "Connected successfully to the xbee.\n";
+
+
+      for (int i=1;i<ChessBoardWidth+1;i++)
+        for (int j=1;j<ChessBoardWidth+1;j++)
         {
-           BallsArray[i][j] = -1;
-           VisitsArray[i][j] = 0;
-           VisitsArrayTime [i][j] = 0;
-            ShortPath[i][j] = 100; //
+            BallExploration[i][j] = -1;
         }
 }
 
@@ -223,8 +426,6 @@ bool checkBoundary(Position v_Pos)
 
     return true;
 }
-
-
 
 //Get the appropriate position to go
 char GetPosNotChecked(Position v_currPos) //F:front;L:left;R:right;B:back
@@ -406,7 +607,6 @@ void setVisit (Position *v_Pos)
 {
  BallsArray[v_Pos->horizontal][v_Pos->vertical] = 0;
 }
-
 void GoForward(Position *v_currPos)
 {
     VisitsArray[v_currPos->horizontal][v_currPos->vertical]++;
@@ -448,3 +648,75 @@ void TurnTheCar(Position *v_currPos, char v_turn)
     }
     //std::cout << "turn to " << v_currPos->Direction <<std::endl;
 }
+
+
+char Command_Sensor(char *ch)
+{
+    Sleep(500);
+    clock_t begin, end;
+    double time_spent;
+    int running_time;
+
+    bool ii = SP->WriteData(ch,1);
+    begin = clock();
+    int readResult = 1;
+    char incomingData[MAX_LEN] = "";
+
+         do {
+            memset(incomingData, '\0', MAX_LEN);
+            readResult = SP->ReadData(incomingData,10);
+           if ((strncmp(incomingData,"1",1)==0) || (strncmp(incomingData,"0",1)==0) )
+            {
+                 printf("Received sensor info from car:%s\n",incomingData);
+
+                 break;
+            }
+            end = clock();
+            time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+        } while ((time_spent<3) ); //waiting for 2 seconds
+
+   //two seconds for the led off (receiving led)
+    printf("time spent:%f\n",time_spent );
+    if (strncmp(incomingData,"0",1)==0) return '0';
+    if (strncmp(incomingData,"1",1)==0) return '1';
+
+}
+
+void Command_Data (char *ch, int sleeptime)
+{
+    Sleep(500);
+    clock_t begin, end;
+    double time_spent;
+    int running_time;
+
+    bool ii = SP->WriteData(ch,1);
+    begin = clock();
+
+    int readResult = 1;
+    char incomingData[MAX_LEN] = "";
+
+        do {
+            memset(incomingData, '\0', MAX_LEN);
+            readResult = SP->ReadData(incomingData,10);
+            if (!strncmp(ch,incomingData,1))
+            {
+                 printf("Received complete message from car:%s\n",incomingData);
+
+                 break;
+            }
+            end = clock();
+            time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+        } while ((time_spent<10) ); //waiting for 10 seconds
+
+
+   //two seconds for the led off (receiving led)
+    printf("time spent:%f\n",time_spent );
+
+    if (time_spent>=10)
+    {
+        printf("Warning: no response from car.\n");
+        //exit (0);
+    }
+}
+
+
