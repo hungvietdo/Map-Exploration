@@ -330,6 +330,5 @@ Please have some further reading into the content of each function.
 -   Change distance of each step (Explain how).
 
 References
-
 1\. Animation from
 *https://en.wikipedia.org/wiki/Dijkstra%27s\_algorithm*
