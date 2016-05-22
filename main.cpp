@@ -64,41 +64,48 @@ void map_exploration()
    dataInitialize();
 
     //add the first pos to the list
-    Position v_currPos {1,1,'S'};
+    Position v_currPos ;
+    v_currPos.Direction ='S';
+    v_currPos.horizontal = 1;
+    v_currPos.vertical = 1;
     vectorPositions.push_back(v_currPos);
-
-
 
     while (vectorPositions.size()>0)
     {
-        cout<<"o day";
             leftPos = getPos(v_currPos,'L');
             rightPos = getPos(v_currPos,'R');
             backPos = getPos(v_currPos,'B');
             frontPos = getPos(v_currPos,'F');
 
-            //Check front
             if (not_in_the_list(frontPos))
             {
+                //cout<<"o day";
                 if (checking_pos(frontPos))
+                {
+                    //cout << frontPos.horizontal<<frontPos.vertical << "\n";
                     vectorPositions.push_back(frontPos);
+                }
             }
 
-            //Check right position
-            if (not_in_the_list(rightPos))
-                {
-                    //Turn car to the right
-                    TurnTheCar(&v_currPos,'R');
-
-
-                    if (checking_pos(rightPos))
-                    vectorPositions.push_back(rightPos);
-                }
-
+//            //Check right position
+//            if (not_in_the_list(rightPos))
+//                {
+//                    //Turn car to the right
+//                    TurnTheCar(&v_currPos,'R');
+//
+//
+//                    if (checking_pos(rightPos))
+//                    vectorPositions.push_back(rightPos);
+//                }
+//
             //Check left position
             if (not_in_the_list(leftPos))
                 {
                     //Turn car to the left
+                    //Physical Turn
+                    Command_Data("L",1000);
+
+                    //Logical turn (data)
                     TurnTheCar(&v_currPos,'L');
 
                     if (checking_pos(leftPos))
@@ -108,9 +115,12 @@ void map_exploration()
             //Which position to check next
             //Find closest position from the list
             t_pos = get_to_closest_pos(vectorPositions,v_currPos);
+            if (t_pos.horizontal !=0)
+            {
+                //travel to that position
+                travel_from_pos_to_pos(v_currPos,&t_pos);
+            }
 
-            //travel to that position
-            travel_from_pos_to_pos(v_currPos,t_pos);
 
             //remove v_currentPos out of the list;
             remove_pos(v_currPos);

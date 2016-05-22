@@ -18,9 +18,9 @@
 
 #define SleepTime 50
 
-#define ChessBoardWidth 5
-#define FinishX 5
-#define FinishY 5
+#define ChessBoardWidth 2
+#define FinishX 2
+#define FinishY 2
 #define StartX 1
 #define StartY 1
 #define StartDir 'S'
@@ -76,5 +76,5 @@ char Command_Sensor(char *ch);
 bool checking_pos(Position frontPos);
 int get_min_step(Position from_pos,Position to_pos);
 Position get_to_closest_pos(std::vector<Position> vectorPositions,Position start_pos);
-void travel_from_pos_to_pos(Position from_pos,Position to_pos);
+void travel_from_pos_to_pos(Position from_pos,Position *to_pos);
 

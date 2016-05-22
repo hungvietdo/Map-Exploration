@@ -1,15 +1,15 @@
 #include "runningcar.h"
 #include <limits.h>
 using namespace std;
-Serial* SP = new Serial("\\\\.\\COM3");    // adjust as needed
+Serial* SP = new Serial("\\\\.\\COM5");    // adjust as needed
 
 int BallsArray[ChessBoardWidth][ChessBoardWidth];
 int VisitsArray[ChessBoardWidth][ChessBoardWidth];
 int VisitsArrayTime[ChessBoardWidth][ChessBoardWidth];
 int ShortPath[ChessBoardWidth][ChessBoardWidth];
-int travelPath[ChessBoardWidth][ChessBoardWidth];
-int tmpShortPath[ChessBoardWidth][ChessBoardWidth];
-int BallExploration[ChessBoardWidth][ChessBoardWidth];
+int travelPath[ChessBoardWidth+2][ChessBoardWidth+2];
+int tmpShortPath[ChessBoardWidth+2][ChessBoardWidth+2];
+int BallExploration[ChessBoardWidth+2][ChessBoardWidth+2];
 
 int VisitTimeCount;
 
@@ -24,12 +24,15 @@ Position StartPos = {StartX,StartY};
 
 bool checking_pos(Position frontPos)
 {
+
+
     if (checkBoundary(frontPos))
             {
+                //cout << frontPos.horizontal<<frontPos.vertical << "\n";
                 //Send a sensor signal to the car. Return value is a char with 0 or 1
                 char sensor_info = Command_Sensor("S");
 
-                if ((sensor_info == '1') || (BallExploration[frontPos.horizontal][frontPos.vertical] ==1)) //check sensor and data before
+                if ((sensor_info == '0') || (BallExploration[frontPos.horizontal][frontPos.vertical] ==1)) //check sensor and data before
                     {
                     //add frontPos to the list
 
@@ -43,6 +46,7 @@ bool checking_pos(Position frontPos)
                 }
             }
 
+    return false;
 }
 
 int get_min_step(Position from_pos,Position to_pos)
@@ -51,8 +55,8 @@ int get_min_step(Position from_pos,Position to_pos)
     bool v_check;
 
 
-    for (i=1;i<ChessBoardWidth+1;i++)
-        for (j=1;j<ChessBoardWidth+1;j++)
+    for (i=0;i<ChessBoardWidth+1;i++)
+        for (j=0;j<ChessBoardWidth+1;j++)
         {
             //BallExploration[i][j] = -1;
 
@@ -71,7 +75,7 @@ int get_min_step(Position from_pos,Position to_pos)
             {
                 if (BallExploration[i][j] == 0)
                     {
-                        if ((j+1<ChessBoardWidth) && (BallExploration[i][j+1] == 0) && (tmpShortPath[i][j+1]>tmpShortPath[i][j]+1))
+                        if ((j+1<=ChessBoardWidth) && (BallExploration[i][j+1] == 0) && (tmpShortPath[i][j+1]>tmpShortPath[i][j]+1))
                         {
 
                               v_check = true;
@@ -90,7 +94,7 @@ int get_min_step(Position from_pos,Position to_pos)
                               v_check = true;
                              tmpShortPath[i-1][j] = tmpShortPath[i][j]+1 ;
                         }
-                        if ((i+1<ChessBoardWidth) && (BallExploration[i+1][j] == 0) && (tmpShortPath[i+1][j]>tmpShortPath[i][j]+1))
+                        if ((i+1<=ChessBoardWidth) && (BallExploration[i+1][j] == 0) && (tmpShortPath[i+1][j]>tmpShortPath[i][j]+1))
                         {
 
                               v_check = true;
@@ -100,6 +104,7 @@ int get_min_step(Position from_pos,Position to_pos)
 
             }
     } while (v_check);
+
 
     //Return steps need to take from_pos to to_pos
     return tmpShortPath[to_pos.horizontal][to_pos.vertical];
@@ -114,43 +119,68 @@ Position get_to_closest_pos(std::vector<Position> vectorPositions,Position start
     min_steps = SHRT_MAX;
 
     Position finish_pos;
-    for ( int i =0; i<vectorPositions.size(); ++i)
+
+    v_pos.horizontal = 0;
+    v_pos.vertical = 0;
+
+    for ( int i =0; i<vectorPositions.size(); i++)
     {
         finish_pos = vectorPositions.at(i);
-        v_steps = get_min_step(finish_pos,start_pos); //***** Very important: in the reverse order finish_pos and start_pos *****
-
-        if (v_steps<min_steps)
+        if ((finish_pos.horizontal != start_pos.horizontal) || (finish_pos.vertical != start_pos.vertical))
         {
-            min_steps = v_steps;
-            v_pos = finish_pos;
+                v_steps = get_min_step(finish_pos,start_pos); //***** Very important: in the reverse order finish_pos and start_pos *****
 
-            //remember travel path
-            for (int i=1;i<ChessBoardWidth+1;i++)
-                for (int j=1;j<ChessBoardWidth+1;j++)
-                    {
-                        travelPath[i][j] = tmpShortPath[i][j];
-                    }
+                if (v_steps<min_steps)
+                {
+                    min_steps = v_steps;
+                    v_pos = finish_pos;
+
+                    //remember travel path
+                    for (int i=0;i<ChessBoardWidth+1;i++)
+                        for (int j=0;j<ChessBoardWidth+1;j++)
+                            {
+                                travelPath[i][j] = tmpShortPath[i][j];
+                            }
+                }
         }
     }
     return v_pos; //the closest position
 
 }
 
-void travel_from_pos_to_pos(Position from_pos,Position to_pos)
+void travel_from_pos_to_pos(Position from_pos,Position *to_pos)
 {
     //Get travel path
 
-    int StepsCount = travelPath[from_pos.horizontal] [ from_pos.vertical ];
+//    cout << from_pos.horizontal<<from_pos.vertical << "from_pos \n";
+//    cout << to_pos.horizontal<<to_pos.vertical << "to_pos \n";
+
+
     int v_v, v_h;
     Position travelPos = from_pos;
     int i = 1;
-    Position TravelPos;
-    char v_turn;
-    int v_travelpos = 1;
-    int v_steps;
-    string str;
+    int j;
 
-    while (StepsCount+1 > i)
+
+
+//     for (i=1;i<ChessBoardWidth+1;i++)
+//        {
+//            cout << endl;
+//
+//            for (j=1;j<ChessBoardWidth+1;j++)
+//                {
+//                    if (travelPath[i][j]<0) cout << "0 ";
+//                    else
+//                    cout << travelPath[i][j] << " ";
+//                }
+//        }
+
+
+
+
+    int StepsCount = travelPath[from_pos.horizontal] [from_pos.vertical];
+    i = 1;
+    while (StepsCount+1 >= i)
         {
            TravelArray[i] =  travelPos;
            v_v = travelPos.vertical;
@@ -166,16 +196,26 @@ void travel_from_pos_to_pos(Position from_pos,Position to_pos)
            i++;
         }
 
-    //Make the actual run from the TravelArray info
-    TravelPos.Direction = from_pos.Direction; //start direction
-    TravelPos.horizontal = from_pos.horizontal;
-    TravelPos.vertical = from_pos.vertical;
 
-     while ((TravelPos.horizontal != to_pos.horizontal) || (TravelPos.horizontal != to_pos.horizontal))
+
+
+
+
+    //Make the actual run from the TravelArray info
+    travelPos.Direction = from_pos.Direction; //start direction
+    travelPos.horizontal = from_pos.horizontal;
+    travelPos.vertical = from_pos.vertical;
+
+    int v_travelpos = 1; //from the first item in the TravelArray
+     char v_turn;
+    int v_steps;
+    string str;
+
+     while ((travelPos.horizontal != to_pos->horizontal) || (travelPos.vertical != to_pos->vertical))
      //   for (int i=1;i<10;i++)
         {
         //turn the car
-        v_turn = get_next_direction(v_travelpos,TravelPos.Direction);
+        v_turn = get_next_direction(v_travelpos,travelPos.Direction);
 
         std::cout << "turn the car " << v_turn << endl;
 
@@ -187,19 +227,21 @@ void travel_from_pos_to_pos(Position from_pos,Position to_pos)
             }
 
          v_steps = GetNumberOfSteps(v_travelpos);
+
+
         //run the car v_steps
         std::cout << "Number of steps: " << v_steps << endl;
 
             std::stringstream ss;
-            ss << TravelPos.Direction << v_turn;
+            ss << travelPos.Direction << v_turn;
             str = ss.str();
 
-            //cout << " before dir: " << TravelPos.Direction << " str: " << str << endl;
+            //cout << " before dir: " << travelPos.Direction << " str: " << str << endl;
 
-            if ((str == "EL") || (str == "WR")) TravelPos.Direction = 'N';
-            if ((str == "WL") || (str == "ER")) TravelPos.Direction = 'S';
-            if ((str == "SL") || (str == "NR")) TravelPos.Direction = 'E';
-            if ((str == "NL") || (str == "SR")) TravelPos.Direction = 'W';
+            if ((str == "EL") || (str == "WR")) travelPos.Direction = 'N';
+            if ((str == "WL") || (str == "ER")) travelPos.Direction = 'S';
+            if ((str == "SL") || (str == "NR")) travelPos.Direction = 'E';
+            if ((str == "NL") || (str == "SR")) travelPos.Direction = 'W';
 
                //Run the car v_steps
 
@@ -207,31 +249,21 @@ void travel_from_pos_to_pos(Position from_pos,Position to_pos)
             snprintf(c_steps, sizeof c_steps, "%d", v_steps);
 			puts(c_steps);
 
+
+
             cout << c_steps;
             Command_Data(c_steps,500);
-            setCurrentTravel(&TravelPos,v_travelpos + v_steps);
+            setCurrentTravel(&travelPos,v_travelpos + v_steps);
             v_travelpos = v_travelpos + v_steps ;
 
-            cout << "current position" << TravelPos.horizontal << "," << TravelPos.vertical << endl ;
+            cout << "current position" << travelPos.horizontal << "," << travelPos.vertical << endl ;
 
 
         }
 
+         to_pos->Direction = travelPos.Direction; //set to_pos direction
 
 }
-
-bool checkFinishPos (Position v_Pos)
-{
-    //std::cout << "check finish" << ((v_Pos.horizontal == FinishPos.horizontal) && (v_Pos.vertical == FinishPos.vertical));
-    return ((v_Pos.horizontal == FinishPos.horizontal) && (v_Pos.vertical == FinishPos.vertical));
-}
-
-int CalDistance(Position v_Pos,Position v_FinishPos)
-{
-    return abs(v_Pos.horizontal-v_FinishPos.horizontal)+abs(v_Pos.vertical-v_FinishPos.vertical);
-
-}
-
 int GetNumberOfSteps ( int v_travelPos)
 {
     int i =1;
@@ -280,7 +312,6 @@ void GetShortestPath()
 {
     int i, j;
     bool v_check;
-
 
 //set values for destination. no-ball and value of path is 1
 ShortPath[ChessBoardWidth][ChessBoardWidth] = 1;
@@ -383,11 +414,14 @@ void dataInitialize()
 		cout << "Connected successfully to the xbee.\n";
 
 
-      for (int i=1;i<ChessBoardWidth+1;i++)
-        for (int j=1;j<ChessBoardWidth+1;j++)
+      for (int i=0;i<ChessBoardWidth+1;i++)
+        for (int j=0;j<ChessBoardWidth+1;j++)
         {
             BallExploration[i][j] = -1;
         }
+
+    //set the first position avaiable
+    BallExploration[1][1]=0;
 }
 
 Position getPos(Position v_Pos,char v_side)
@@ -400,7 +434,7 @@ Position getPos(Position v_Pos,char v_side)
 
     ss << v_Pos.Direction << v_side;
     str = ss.str();
-    //std::cout << str;
+    //std::cout << v_Pos.Direction << v_side << "\n";
     if ((str == "EL") || (str == "WR") || (str == "SB") || (str == "NF"))
         tmpPos.horizontal = tmpPos.horizontal-1;
 
@@ -425,42 +459,6 @@ bool checkBoundary(Position v_Pos)
         return false;
 
     return true;
-}
-
-//Get the appropriate position to go
-char GetPosNotChecked(Position v_currPos) //F:front;L:left;R:right;B:back
-{
-    Position leftPos, rightPos, backPos,frontPos;
-
-    leftPos = getPos(v_currPos,'L');
-    rightPos = getPos(v_currPos,'R');
-    backPos = getPos(v_currPos,'B');
-    frontPos = getPos(v_currPos,'F');
-
-    //std::cout << BallsArray[2][4]<<frontPos.vertical<<frontPos.horizontal;
-
-    //Set priority to check: first-->front, second-->left, third-->right, last-->back
-    if ((checkBoundary(frontPos)) && (BallsArray[frontPos.horizontal][frontPos.vertical] ==-1))
-            return 'F';
-
-    //Decision between two equal visits at finish point
-    if ((checkBoundary(leftPos)) && (BallsArray[leftPos.horizontal][leftPos.vertical]==-1) &&
-        (checkBoundary(rightPos)) && (BallsArray[rightPos.horizontal][rightPos.vertical] ==-1))
-                {
-                    if (CalDistance(leftPos,FinishPos) < CalDistance(rightPos,FinishPos))
-                        return 'L';
-                    else
-                        return 'R';
-                }
-
-    if ((checkBoundary(leftPos)) && (BallsArray[leftPos.horizontal][leftPos.vertical] ==-1))
-            return 'L';
-    if ((checkBoundary(rightPos)) && (BallsArray[rightPos.horizontal][rightPos.vertical] ==-1))
-            return 'R';
-    if ((checkBoundary(backPos)) && (BallsArray[backPos.horizontal][backPos.vertical] ==-1))
-            return 'B';
-
-    return 'O'; //error;
 }
 
 
